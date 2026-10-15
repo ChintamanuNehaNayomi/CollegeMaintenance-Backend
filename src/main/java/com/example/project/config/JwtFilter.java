@@ -1,3 +1,5 @@
+
+
 package com.example.project.config;
 
 import java.io.IOException;
@@ -34,13 +36,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
             String token = authHeader.substring(7);
 
-            if (jwtService.isTokenValid(token)) {
-
-                System.out.println("Valid JWT Token");
-
+            if (jwtService.parseAccessToken(token) != null) {
+                System.out.println("Valid JWT Access Token");
             } else {
-
-                System.out.println("Invalid or expired JWT Token");
+                System.out.println("Invalid or expired JWT Access Token");
             }
         }
 
