@@ -1,0 +1,40 @@
+package com.example.project.config;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class CorsConfig {
+
+    @Value("${app.cors.allowed-origins}")
+    private String configuredOrigins;
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        List<String> allowedOrigins = new ArrayList<>();
+        for (String origin : configuredOrigins.split(",")) {
+            String trimmedOrigin = origin.trim();
+            if (!trimmedOrigin.isEmpty()) {
+                allowedOrigins.add(trimmedOrigin);
+            }
+        }
+
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOriginPatterns(
+                                allowedOrigins.toArray(new String[0]))
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
+            }
+        };
+    }
+}
