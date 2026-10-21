@@ -72,7 +72,7 @@ public class SecurityConfig {
                 // ownership checks must also be enforced in the controller.
                 .requestMatchers("/api/requests/**").authenticated()
 
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
             )
             .addFilterBefore(
                 jwtAuthenticationFilter,

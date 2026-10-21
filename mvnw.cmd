@@ -30,9 +30,21 @@
 @IF "%__MVNW_ARG0_NAME__%"=="" (SET __MVNW_ARG0_NAME__=%~nx0)
 @SET __MVNW_CMD__=
 @SET __MVNW_ERROR__=
+@SET "__MVNW_POWERSHELL__="
+@FOR /F "delims=" %%P IN ('where powershell.exe 2^>nul') DO @IF NOT DEFINED __MVNW_POWERSHELL__ SET "__MVNW_POWERSHELL__=%%P"
+@IF NOT DEFINED __MVNW_POWERSHELL__ IF EXIST "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" SET "__MVNW_POWERSHELL__=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
+@IF NOT DEFINED __MVNW_POWERSHELL__ (
+  @WHERE mvn.cmd >nul 2>nul
+  @IF ERRORLEVEL 1 (
+    @echo ERROR: Maven Wrapper needs Windows PowerShell or installed Maven (mvn.cmd). >&2
+    @exit /b 1
+  )
+  @CALL mvn.cmd %*
+  @EXIT /B
+)
 @SET __MVNW_PSMODULEP_SAVE=%PSModulePath%
 @SET PSModulePath=
-@FOR /F "usebackq tokens=1* delims==" %%A IN (`powershell -noprofile "& {$scriptDir='%~dp0'; $script='%__MVNW_ARG0_NAME__%'; icm -ScriptBlock ([Scriptblock]::Create((Get-Content -Raw '%~f0'))) -NoNewScope}"`) DO @(
+@FOR /F "usebackq tokens=1* delims==" %%A IN (`"%__MVNW_POWERSHELL__%" -noprofile "& {$scriptDir='%~dp0'; $script='%__MVNW_ARG0_NAME__%'; icm -ScriptBlock ([Scriptblock]::Create((Get-Content -Raw '%~f0'))) -NoNewScope}"`) DO @(
   IF "%%A"=="MVN_CMD" (set __MVNW_CMD__=%%B) ELSE IF "%%B"=="" (echo %%A) ELSE (echo %%A=%%B)
 )
 @SET PSModulePath=%__MVNW_PSMODULEP_SAVE%

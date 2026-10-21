@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
+import java.util.Map;
 
 import jakarta.persistence.EntityManager;
 
@@ -54,6 +55,26 @@ class ProjectApplicationTests {
 
 	@Test
 	void contextLoads() {
+	}
+
+	@Test
+	void literalEnvironmentPlaceholdersAreRejectedWithoutLoggingTheirValues() {
+		IllegalStateException exception = org.junit.jupiter.api.Assertions
+				.assertThrows(IllegalStateException.class, () ->
+						ProjectApplication.validateEnvironmentVariables(Map.of(
+								"DB_USERNAME", "${DB_USERNAME}",
+								"DB_PASSWORD", "private-test-value")));
+
+		org.junit.jupiter.api.Assertions.assertTrue(
+				exception.getMessage().contains("DB_USERNAME"));
+		org.junit.jupiter.api.Assertions.assertFalse(
+				exception.getMessage().contains("private-test-value"));
+	}
+
+	@Test
+	void unspecifiedRoutesRequireAuthentication() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/not-a-public-endpoint"))
+				.andExpect(status().isUnauthorized());
 	}
 
 	@Test
@@ -93,6 +114,7 @@ class ProjectApplicationTests {
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/api/register")
 				.contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer malformed-token")
 				.content(registration))
 				.andExpect(status().isCreated());
 
@@ -109,6 +131,7 @@ class ProjectApplicationTests {
 		MvcResult loginResult = mockMvc.perform(
 				MockMvcRequestBuilders.post("/api/login")
 						.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+						.header("Authorization", "Bearer malformed-token")
 						.param("username", " " + username + " ")
 						.param("password", password))
 				.andExpect(status().isOk())
